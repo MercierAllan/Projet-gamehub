@@ -47,7 +47,7 @@ if (!empty($errors)) {
 // Hachage du mot de passe
 $hashed_password = password_hash($password, PASSWORD_DEFAULT);
 
-// Stockage simple dans un fichier JSON (pour test, pas en prod)
+// Stockage simple dans un fichier JSON 
 $usersFile = 'users.json';
 $users = [];
 
