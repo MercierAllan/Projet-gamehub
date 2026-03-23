@@ -1,6 +1,11 @@
 <?php
 session_start();
 
+// Si déjà connecté -> redirection
+if (isset($_SESSION['user'])) {
+    header('Location: index.php');
+    exit;
+}
 // Récupérer les données du formulaire
 $identifier = trim($_POST['identifier'] ?? '');
 $password = $_POST['password'] ?? '';

@@ -1,6 +1,12 @@
 <?php
 session_start();
 
+// Si déjà connecté -> redirection
+if (isset($_SESSION['user'])) {
+    header('Location: index.php');
+    exit;
+}
+
 // Fonction de validation du mot de passe
 function validate_password($password) {
     return preg_match('/^(?=.*[A-Z])(?=.*\d).{8,}$/', $password);
@@ -16,12 +22,12 @@ $confirm_password = $_POST['confirm_password'] ?? '';
 $errors = [];
 
 // Vérification du login
-if (empty($login) || strlen($login) < 3) {
-    $errors[] = "Le login doit contenir au moins 3 caractères.";
+if (!preg_match('/^[a-zA-Z0-9]{3,}$/', $login)) {
+    $errors[] = "Le login doit contenir uniquement lettres et chiffres (min 3 caractères).";
 }
 
 // Vérification de l'email
-if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+if (!preg_match('/^[^@\s]+@[^@\s]+\.[^@\s]+$/', $email)) {
     $errors[] = "Adresse email invalide.";
 }
 
