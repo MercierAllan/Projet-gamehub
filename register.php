@@ -1,7 +1,8 @@
 <?php
 session_start();
+include 'db.php';
 
-$errors = [];
+$errors  = [];
 $success = false;
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -10,34 +11,46 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $password = $_POST['password'] ?? '';
     $confirm  = $_POST['confirm'] ?? '';
 
-    //vérification champs vides
+    // Vérification champs vides
     if (empty($login))    $errors[] = "Le login est obligatoire.";
     if (empty($email))    $errors[] = "L'email est obligatoire.";
     if (empty($password)) $errors[] = "Le mot de passe est obligatoire.";
     if (empty($confirm))  $errors[] = "La confirmation du mot de passe est obligatoire.";
 
-    //validation login : lettres et chiffres uniquement, min 3 caractères
+    // Validation login : lettres et chiffres et min 3 caractères
     if (!empty($login) && !preg_match('/^[a-zA-Z0-9]{3,}$/', $login)) {
         $errors[] = "Le login doit contenir uniquement des lettres et des chiffres (minimum 3 caractères).";
     }
 
-    //validation email
+    // Validation email
     if (!empty($email) && !preg_match('/^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$/', $email)) {
         $errors[] = "L'adresse email n'est pas valide.";
     }
 
-    //validation mot de passe : min 8 caractères, au moins une majuscule et au moins un chiffre
+    // Validation mot de passe : min 8 caractères, 1 majuscule et 1 chiffre
     if (!empty($password) && !preg_match('/^(?=.*[A-Z])(?=.*\d).{8,}$/', $password)) {
         $errors[] = "Le mot de passe doit contenir au moins 8 caractères, une majuscule et un chiffre.";
     }
 
-    //vérification correspondance mot de passe
+    // Vérification correspondance
     if (!empty($password) && !empty($confirm) && $password !== $confirm) {
         $errors[] = "Les mots de passe ne correspondent pas.";
     }
 
-    //pas d'erreurs : inscription réussie
+    //vérification login et email
     if (empty($errors)) {
+        $stmt = $pdo->prepare("SELECT id FROM users WHERE login = ? OR email = ?");
+        $stmt->execute([$login, $email]);
+        if ($stmt->fetch()) {
+            $errors[] = "Ce login ou cet email est déjà utilisé.";
+        }
+    }
+
+    //insertion en base
+    if (empty($errors)) {
+        $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
+        $stmt = $pdo->prepare("INSERT INTO users (login, email, password) VALUES (?, ?, ?)");
+        $stmt->execute([$login, $email, $hashedPassword]);
         $success = true;
     }
 }
@@ -82,7 +95,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <?php if ($success): ?>
                     <div class="alert alert-success">
                         <strong>Inscription réussie !</strong> Votre compte a bien été créé.
-                        <a href="login.html" class="alert-link">Se connecter</a>
+                        <a href="login.html" class="alert-link">Se connecter maintenant</a>
                     </div>
                 <?php endif; ?>
 

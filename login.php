@@ -1,5 +1,6 @@
 <?php
 session_start();
+include 'db.php';
 
 $errors = [];
 
@@ -7,14 +8,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $identifier = trim($_POST['identifier'] ?? '');
     $password   = $_POST['password'] ?? '';
 
-    //vérification champs vides
+    // Vérification champs vides
     if (empty($identifier)) $errors[] = "L'identifiant est obligatoire.";
     if (empty($password))   $errors[] = "Le mot de passe est obligatoire.";
 
     if (empty($errors)) {
-        $_SESSION['login'] = $identifier;
-        header("Location: index.php");
-        exit;
+        // Récupération de l'utilisateur en base
+        $stmt = $pdo->prepare("SELECT * FROM users WHERE login = ?");
+        $stmt->execute([$identifier]);
+        $user = $stmt->fetch();
+
+        if ($user && password_verify($password, $user['password'])) {
+            // Connexion réussie, enregistre dans la session
+            $_SESSION['user_id'] = $user['id'];
+            $_SESSION['login']   = $user['login'];
+            header("Location: index.php");
+            exit;
+        } else {
+            $errors[] = "Identifiant ou mot de passe incorrect.";
+        }
     }
 }
 ?>
