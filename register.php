@@ -17,7 +17,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (empty($password)) $errors[] = "Le mot de passe est obligatoire.";
     if (empty($confirm))  $errors[] = "La confirmation du mot de passe est obligatoire.";
 
-    // Validation login : lettres et chiffres et min 3 caractères
+    // Validation login : lettres et chiffres, min 3 caractères
     if (!empty($login) && !preg_match('/^[a-zA-Z0-9]{3,}$/', $login)) {
         $errors[] = "Le login doit contenir uniquement des lettres et des chiffres (minimum 3 caractères).";
     }
@@ -27,7 +27,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $errors[] = "L'adresse email n'est pas valide.";
     }
 
-    // Validation mot de passe : min 8 caractères, 1 majuscule et 1 chiffre
+    // Validation mot de passe : min 8 caractères, 1 majuscule, 1 chiffre
     if (!empty($password) && !preg_match('/^(?=.*[A-Z])(?=.*\d).{8,}$/', $password)) {
         $errors[] = "Le mot de passe doit contenir au moins 8 caractères, une majuscule et un chiffre.";
     }
@@ -37,7 +37,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $errors[] = "Les mots de passe ne correspondent pas.";
     }
 
-    //vérification login et email
+    // Vérification unicité login et email
     if (empty($errors)) {
         $stmt = $pdo->prepare("SELECT id FROM users WHERE login = ? OR email = ?");
         $stmt->execute([$login, $email]);
@@ -46,7 +46,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 
-    //insertion en base
+    // Insertion en base
     if (empty($errors)) {
         $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
         $stmt = $pdo->prepare("INSERT INTO users (login, email, password) VALUES (?, ?, ?)");

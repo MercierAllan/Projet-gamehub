@@ -1,5 +1,19 @@
 <?php
 session_start();
+
+$games = [];
+if (file_exists('db.php')) {
+    include 'db.php';
+    try {
+        $stmt = $pdo->query("SELECT games.*, users.login AS creator FROM games
+                             LEFT JOIN users ON games.user_id = users.id
+                             ORDER BY games.id DESC");
+        $games = $stmt->fetchAll();
+    } catch (Exception $e) {
+        //la table n'existe pas encore, on ignore
+        $games = [];
+    }
+}
 ?>
 <!DOCTYPE html>
 <html lang="fr">

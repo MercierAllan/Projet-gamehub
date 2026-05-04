@@ -1,8 +1,6 @@
 <?php
 session_start();
 include 'db.php';
-
-// l'utilisateur doit être connecté
 if (!isset($_SESSION['user_id'])) {
     header("Location: login.html");
     exit;
